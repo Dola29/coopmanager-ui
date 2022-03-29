@@ -10,7 +10,7 @@
 
         <div class="text-end">
           <router-link to="/login" class="btn btn-outline-light me-2">Login</router-link>
-          <router-link to="/register" class="btn btn-outline-light me-2">Register</router-link>
+          <router-link to="/register" class="btn btn-outline-light me-2">Registrar</router-link>
         </div>
       </div>
     </div>

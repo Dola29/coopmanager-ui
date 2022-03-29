@@ -22,7 +22,7 @@ export default {
     onMounted(async () => {
       try {
         const {data} = await axios.get('auth/user');
-        message.value = `Hi ${data.name}`;
+        message.value = `Hola ${data.name}`;
       } catch (e) {
         await router.push('auth/login');
       }
