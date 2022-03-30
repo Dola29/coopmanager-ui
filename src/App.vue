@@ -1,23 +1,24 @@
 <template>
-  <header class="p-3 bg-dark text-white">
-    <div class="container">
-      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-          <li>
-            <router-link to="/" class="nav-link px-2 text-white">Home</router-link>
-          </li>
-        </ul>
-
-        <div class="text-end">
-          <router-link to="/login" class="btn btn-outline-light me-2">Login</router-link>
-          <router-link to="/register" class="btn btn-outline-light me-2">Registrar</router-link>
-        </div>
-      </div>
-    </div>
-  </header>
+  <Nav/>
 
   <router-view/>
+
+  <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel">Offcanvas</h5>
+    </div>
+    <div class="offcanvas-body">
+      
+    </div>
+  </div>  
 </template>
+
+<script>
+import Nav from "@/components/Nav"
+export default {
+  components:{Nav}
+}
+</script>
 
 <style>
 .form-signin {

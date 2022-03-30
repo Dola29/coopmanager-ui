@@ -1,19 +1,19 @@
 <template>
   <main class="form-signin">
-    <form @submit.prevent="submit">
-      <h1 class="h3 mb-3 fw-normal">Login</h1>
+    <form @submit.prevent="submit" class="text-center">
+      <h1 class="h2 mb-3 fw-normal">Acceso</h1>
 
       <div class="form-floating">
-        <input type="email" class="form-control" name="email" placeholder="name@example.com">
+        <input type="email" class="form-control" name="email" placeholder="usuario@example.com">
         <label>Email</label>
       </div>
 
       <div class="form-floating">
-        <input type="password" class="form-control" name="password" placeholder="Password">
-        <label>Password</label>
+        <input type="password" class="form-control" name="password" placeholder="Contraseña">
+        <label>Contraseña</label>
       </div>
 
-      <button class="w-100 btn btn-lg btn-primary" type="submit">Submit</button>
+      <button class="w-100 btn btn-lg btn-primary" type="submit">Enviar</button>
     </form>
   </main>
 </template>
@@ -38,12 +38,13 @@ export default {
 
       axios.defaults.headers.common['Authorization'] = `${data['jwt']}`;
 
-      await router.push('/');
+      await router.push('/home');
     }
 
     return {
       submit
     }
+
   }
 }
 </script>

@@ -9,16 +9,16 @@
       </div>
 
       <div class="form-floating">
-        <input type="email" class="form-control" name="email" placeholder="name@example.com">
+        <input type="email" class="form-control" name="email" placeholder="usuario@example.com">
         <label>Email</label>
       </div>
 
       <div class="form-floating">
-        <input type="password" class="form-control" name="password" placeholder="Password">
+        <input type="password" class="form-control" name="password" placeholder="Contraseña">
         <label>Contraseña</label>
       </div>
 
-      <button class="w-100 btn btn-lg btn-primary" type="submit">Submit</button>
+      <button class="w-100 btn btn-lg btn-primary" type="submit">Enviar</button>
     </form>
   </main>
 </template>
