@@ -21,5 +21,14 @@ export default createStore({
             state.user.role = obj.role
         }
 
+    },
+    actions: {
+        setAuth: (context, val) => {
+            context.commit('SET_AUTH', val)
+        },
+        
+        setUser: (context, val) => {
+            context.commit('SET_USER', val)
+        }
     }     
 })

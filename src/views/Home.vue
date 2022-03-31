@@ -22,17 +22,23 @@ export default {
 
     onMounted(async () => {
       try {
-        const {data} = await axios.get('auth/user');
+        const {data} = await axios.get('auth/user', {
+          withCredentials: true
+        });
+
         message.value = `Hola ${data.name}`;
+        
         const user = {
           name: data.name,
           email: data.email,
           role: data.role
         }
-        await store.commit('SET_AUTH', true)
-        await store.commit('SET_USER', user)
+        await store.dispatch('setAuth', true)
+        await store.dispatch('setUser', user)
+
       } catch (e) {
-        await store.commit('SET_AUTH', false)
+
+        await store.dispatch('setAuth', false)
         await router.push('auth/login');
       }
     });
