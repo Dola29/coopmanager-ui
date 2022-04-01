@@ -30,5 +30,11 @@ export default createStore({
         setUser: (context, val) => {
             context.commit('SET_USER', val)
         }
-    }     
+    },
+    getters:{
+        getAuth: (state) => {
+            return state.authenticated
+        },
+        
+    }
 })

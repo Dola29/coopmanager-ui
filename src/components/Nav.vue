@@ -16,7 +16,7 @@
                     <router-link to="/register" class="btn btn-outline-light me-2">Registrar</router-link>
                 </div>
                 <div v-show="auth" class="text-end">
-                    <a class="btn btn-outline-light me-2">{{user.email}}</a>
+                    <a class="btn btn-outline-light me-2">{{user.email || ''}}</a>
                 </div>
             </div>
         </div>
@@ -25,15 +25,11 @@
 
 <script>
 
-import {useStore} from "vuex";
-import {computed} from "vue";
-
 export default {
     name:"Nav",
     setup() {
-        const store = useStore(); 
-        const auth = computed(()=> store.state.authenticated)
-        const user = computed(()=> store.state.user)
+        let user = JSON.parse(localStorage.getItem('user')) || false; 
+        let auth = (localStorage.getItem('authenticated') === 'true');
         return{
             auth,
             user 

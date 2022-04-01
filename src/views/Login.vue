@@ -28,17 +28,22 @@ export default {
     const router = useRouter();
 
     const submit = async e => {
-      const form = new FormData(e.target);
+      try{
+        
+        const form = new FormData(e.target);
 
-      const inputs = Object.fromEntries(form.entries());
+        const inputs = Object.fromEntries(form.entries());
 
-      const {data} = await axios.post('auth/login', inputs, {
-        withCredentials: true
-      });
-
-      axios.defaults.headers.common['Authorization'] = `${data['jwt']}`;
-
-      await router.push('/home');
+        const {data} = await axios.post('auth/login', inputs, {
+          withCredentials: true
+        });
+        axios.defaults.headers.common['Authorization'] = data['jwt'];
+        
+        await router.push('/home');
+        location.reload()
+      }catch (e) {
+        console.log(e)
+      }
     }
 
     return {
