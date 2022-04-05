@@ -1,111 +1,172 @@
 <template>
-  <Nav/>
-  <router-view/>
-  <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-    <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px;">
-      <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
-        <span class="fs-4">Menu</span>
-      </a>
-      <hr>
-      <ul class="nav nav-pills flex-column mb-auto">
-        <li class="nav-item">
-          <router-link to="/" class="nav-link text-white">
-            Home
-          </router-link>
-        </li>
-        <li>
-          <router-link to="/roles" class="nav-link text-white">
-            Roles
-          </router-link>
-        </li>
-        <li>
-          <router-link to="/users" class="nav-link text-white">
-            users
-          </router-link>
-        </li>
-      </ul>
-      <hr>
-      <div class="dropdown">
-        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-          <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
-          <!-- <strong>{{userShortName(user.name)}}</strong> -->
-        </a>
-        <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1" style="">
-          <li><a class="dropdown-item" href="#"  @click="logout">Sign out</a></li>
-        </ul>
-      </div>
-    </div>
-  </div>  
+	<div :class="containerClass" @click="onWrapperClick">
+        <AppTopBar @menu-toggle="onMenuToggle" :user="user" />
+        <div class="layout-sidebar" @click="onSidebarClick">
+            <AppMenu :model="menu" @menuitem-click="onMenuItemClick" />
+        </div>
+
+        <div class="layout-main-container">
+            <div class="layout-main">
+                <router-view />
+            </div>
+            <AppFooter />
+        </div>
+
+		<AppConfig :layoutMode="layoutMode" @layout-change="onLayoutChange" />
+        <transition name="layout-mask">
+            <div class="layout-mask p-component-overlay" v-if="mobileMenuActive"></div>
+        </transition>
+	</div>
 </template>
 
 <script>
-import Nav from "@/components/Nav"
+import AppTopBar from './AppTopbar.vue';
+import AppMenu from './AppMenu.vue';
+import AppConfig from './AppConfig.vue';
+import AppFooter from './AppFooter.vue';
 import axios from "axios";
-import {useRouter} from "vue-router";
+
 
 export default {
-  components:{Nav},
-  setup() {
-    
-    const router = useRouter();
+    emits: ['change-theme'],
+    data() {
+        return {
+            user:{},
+            layoutMode: 'static',
+            staticMenuInactive: false,
+            overlayMenuActive: false,
+            mobileMenuActive: false,
+            menu : [
+                {
+                    label: 'Menu',
+                    items: [
+                        {label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/'},
+                        {label: 'Roles', icon: 'pi pi-fw pi-chevron-right', to: '/roles'},
+						{label: 'Usuarios', icon: 'pi pi-fw pi-users', to: '/users'}
+                    ]
+                }
+            ]
+        }
+    },
+    async mounted() {
+		await this.getUser()
+	},
+    watch: {
+        $route() {
+            this.menuActive = false;
+            this.$toast.removeAllGroups();
+        }
+    },
+    methods: {
+        onWrapperClick() {
+            if (!this.menuClick) {
+                this.overlayMenuActive = false;
+                this.mobileMenuActive = false;
+            }
 
-    let user = JSON.parse(localStorage.getItem('user')); 
-    let auth = (localStorage.getItem('authenticated') === 'true');
+            this.menuClick = false;
+        },
+        onMenuToggle() {
+            this.menuClick = true;
 
-    const userShortName = (name) =>{
-      let names = name.split(" ")
-      return names[0]
+            if (this.isDesktop()) {
+                if (this.layoutMode === 'overlay') {
+					if(this.mobileMenuActive === true) {
+						this.overlayMenuActive = true;
+					}
+
+                    this.overlayMenuActive = !this.overlayMenuActive;
+					this.mobileMenuActive = false;
+                }
+                else if (this.layoutMode === 'static') {
+                    this.staticMenuInactive = !this.staticMenuInactive;
+                }
+            }
+            else {
+                this.mobileMenuActive = !this.mobileMenuActive;
+            }
+
+            event.preventDefault();
+        },
+        onSidebarClick() {
+            this.menuClick = true;
+        },
+        onMenuItemClick(event) {
+            if (event.item && !event.item.items) {
+                this.overlayMenuActive = false;
+                this.mobileMenuActive = false;
+            }
+        },
+		onLayoutChange(layoutMode) {
+			this.layoutMode = layoutMode;
+		},
+        addClass(element, className) {
+            if (element.classList)
+                element.classList.add(className);
+            else
+                element.className += ' ' + className;
+        },
+        removeClass(element, className) {
+            if (element.classList)
+                element.classList.remove(className);
+            else
+                element.className = element.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
+        },
+        isDesktop() {
+            return window.innerWidth >= 992;
+        },
+        isSidebarVisible() {
+            if (this.isDesktop()) {
+                if (this.layoutMode === 'static')
+                    return !this.staticMenuInactive;
+                else if (this.layoutMode === 'overlay')
+                    return this.overlayMenuActive;
+            }
+
+            return true;
+        },
+        async getUser(){
+			try {
+				const {data} = await axios.get('auth/user', {
+                    withCredentials: true
+				});
+				this.user = data;
+			} catch (e) {
+				await this.$router.push('/login');
+			}
+		}
+    },
+    computed: {
+        containerClass() {
+            return ['layout-wrapper', {
+                'layout-overlay': this.layoutMode === 'overlay',
+                'layout-static': this.layoutMode === 'static',
+                'layout-static-sidebar-inactive': this.staticMenuInactive && this.layoutMode === 'static',
+                'layout-overlay-sidebar-active': this.overlayMenuActive && this.layoutMode === 'overlay',
+                'layout-mobile-sidebar-active': this.mobileMenuActive,
+				'p-input-filled': this.$primevue.config.inputStyle === 'filled',
+				'p-ripple-disabled': this.$primevue.config.ripple === false
+            }];
+        },
+        logo() {
+            return (this.$appState.darkTheme) ? "images/logo-white.svg" : "images/logo.svg";
+        }
+    },
+    beforeUpdate() {
+        if (this.mobileMenuActive)
+            this.addClass(document.body, 'body-overflow-hidden');
+        else
+            this.removeClass(document.body, 'body-overflow-hidden');
+    },
+    components: {
+        'AppTopBar': AppTopBar,
+        'AppMenu': AppMenu,
+        'AppConfig': AppConfig,
+        'AppFooter': AppFooter,
     }
-
-    const logout =  () => {
-      localStorage.removeItem('user');
-      localStorage.removeItem('authenticated');
-      axios.post('auth/logout', {}, {withCredentials: true});
-      axios.defaults.headers.common['Authorization'] = '';
-      router.push('/');
-      location.reload()
-    }
-
-    return{
-      logout,
-      userShortName,
-      auth,
-      user
-    }
-  },
 }
 </script>
 
-<style>
-.form-signin {
-  width: 100%;
-  max-width: 330px;
-  padding: 15px;
-  margin: auto;
-}
-
-.form-signin .checkbox {
-  font-weight: 400;
-}
-
-.form-signin .form-floating:focus-within {
-  z-index: 2;
-}
-
-.form-signin input[type="email"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.form-signin input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
-.offcanvas-start {
-  width: 280px !important;
-}
+<style lang="scss">
+@import './App.scss';
 </style>
