@@ -1,5 +1,6 @@
 <template>
     <div class="surface-0 flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
+        <Toast/>
         <div class="grid justify-content-center p-1 lg:p-0" style="min-width:80%">
             <div class="col-12 xl:mt-0 text-center">
                 <img :src="'layout/images/logo-coop.jpg'" alt="CoopManager Logo" style="" >
@@ -17,7 +18,7 @@
                             <InputText id="name" v-model="name" type="text" class="w-full mb-3" placeholder="Nombre completo" style="padding:1rem;" />
 
                             <label for="email" class="block text-900 text-xl font-medium mb-2">Correo</label>
-                            <InputText id="email" v-model="email" type="text" class="w-full mb-3" placeholder="Correo" style="padding:1rem;" />
+                            <InputText id="email" v-model="email" type="email" class="w-full mb-3" placeholder="Correo" style="padding:1rem;" />
                     
                             <label for="password" class="block text-900 font-medium text-xl mb-2">Contraseña</label>
                             <Password id="password" v-model="password" placeholder="Contraseña" :toggleMask="true" 
@@ -63,10 +64,17 @@ export default {
                     email: this.email,
                     password: this.password
                 }
-                await axios.post('auth/register', form);
+                const {data} = await axios.post('auth/register', form);
+                if(data == null){
+                    console.log(data)
+                    throw "Este usuario ya existe en nuestros registros"
+                }else{
+                    this.$toast.add({severity:'Exitoso', summary: 'Exitoso', detail: 'Usuario Registrado correctamente', life: 3000});
+                }
                 await this.$router.push('/login');
             }catch (e) {
-                console.log(e)
+                this.$toast.add({severity:'error', summary: 'Error', detail: e, life: 3000});
+                console.log(e.request)
             }
         }
     },

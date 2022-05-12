@@ -22,7 +22,7 @@
 							currentPageReportTemplate="Mostrando {first} al {last} de {totalRecords} registros" responsiveLayout="scroll">
 					<template #header>
 						<div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-							<h5 class="m-0">Manejo de roles</h5>
+							<h5 class="m-0">Manejo de Prestamos</h5>
 							<span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search" />
                                 <InputText v-model="filters['global'].value" placeholder="Buscar..." />
@@ -40,18 +40,36 @@
 					<Column field="name" header="Nombre" :sortable="true" headerStyle="width:14%; min-width:10rem;">
 						<template #body="slotProps">
 							<span class="p-column-title">Nombre</span>
-							{{slotProps.data.name}}
+							{{slotProps.data.name}} {{slotProps.data.lastname}}
 						</template>
 					</Column>
-					<Column field="description" header="Descripcion" headerStyle="width:25%; min-width:10rem;">
+					<Column field="cedula" :sortable="true" header="Cedula" headerStyle="width:25%; min-width:10rem;">
 						<template #body="slotProps">
-							<span class="p-column-title">Descripcion</span>
-							{{slotProps.data.description}}
+							<span class="p-column-title">Cedula</span>
+							{{slotProps.data.cedula}}
+						</template>
+					</Column>
+					<Column field="loan_amount" header="Monto Solicitado" :sortable="true" headerStyle="width:25%; min-width:10rem;">
+						<template #body="slotProps">
+							<span class="p-column-title">Monto Solicitado</span>
+							{{toMoney(slotProps.data.loan_amount)}}
+						</template>
+					</Column>					
+					<Column field="monthly_income" header="Ingresos Mensuales" :sortable="true" headerStyle="width:25%; min-width:10rem;">
+						<template #body="slotProps">
+							<span class="p-column-title">Ingresos Mensuales</span>
+							{{toMoney(slotProps.data.monthly_income)}}
+						</template>
+					</Column>
+					<Column field="phone_number" header="Telefono" :sortable="true" headerStyle="width:25%; min-width:10rem;">
+						<template #body="slotProps">
+							<span class="p-column-title">Telefono</span>
+							{{slotProps.data.phone_number}}
 						</template>
 					</Column>
 					<Column field="created_at" header="Creacion" :sortable="true" headerStyle="width:14%; min-width:8rem;">
 						<template #body="slotProps">
-							<span class="p-column-title">Creacion</span>
+							<span class="p-column-title">Fecha Registro</span>
 							{{myDate(slotProps.data.created_at)}}
 						</template>
 					</Column>
@@ -62,17 +80,50 @@
 							<Button icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" @click="confirmDeleteItem(slotProps.data)" />
 						</template>
 					</Column>
+					
 				</DataTable>
 
-				<Dialog v-model:visible="itemDialog" :style="{width: '450px'}" header="Detalles del rol" :modal="true" :closable="false" class="p-fluid">
+				<Dialog v-model:visible="itemDialog" :style="{width: '450px'}" header="Detalles del registro" :modal="true" :closable="false" class="p-fluid">
 					<div class="field">
 						<label for="name">Nombre</label>
 						<InputText id="name" v-model.trim="item.name" required="true" autofocus :class="{'p-invalid': submitted && !item.name}" />
 						<small class="p-invalid" v-if="submitted && !item.name">El nombre es requerido</small>
 					</div>
 					<div class="field">
-						<label for="description">Description</label>
-						<Textarea id="description" v-model="item.description" required="true" rows="3" cols="20" />
+						<label for="lastname">Apellido</label>
+						<InputText id="lastname" v-model.trim="item.lastname" required="true" autofocus :class="{'p-invalid': submitted && !item.lastname}" />
+						<small class="p-invalid" v-if="submitted && !item.lastname">El apellido es requerido</small>
+					</div>
+					<div class="field">
+						<label for="cedula">Cedula</label>
+						<InputText id="cedula" v-model.trim="item.cedula" required="true" autofocus :class="{'p-invalid': submitted && !item.cedula}" />
+						<small class="p-invalid" v-if="submitted && !item.cedula">El campo cedula iniciales es requerido</small>
+					</div>
+					
+					<div class="field">
+						<label for="monthly_income">Ingresos Mensuales</label>
+						<InputText id="monthly_income" v-model.trim="item.monthly_income" required="true" autofocus :class="{'p-invalid': submitted && !item.monthly_income}" />
+						<small class="p-invalid" v-if="submitted && !item.monthly_income">El campo Ingresos Mensuales es requerido</small>
+					</div>
+					<div class="field">
+						<label for="loan_amount">Monto Solicitado</label>
+						<InputText id="loan_amount" v-model.trim="item.loan_amount" required="true" autofocus :class="{'p-invalid': submitted && !item.loan_amount}" />
+						<small class="p-invalid" v-if="submitted && !item.loan_amount">El campo Monto Solicitado es requerido</small>
+					</div>
+					<div class="field">
+						<label for="dob">Fecha de Nacimiento</label>
+						<InputText id="dob" v-model.trim="item.dob" required="true" autofocus :class="{'p-invalid': submitted && !item.dob}" />
+						<small class="p-invalid" v-if="submitted && !item.dob">El campo Fecha de Nacimiento iniciales es requerido</small>
+					</div>
+					<div class="field">
+						<label for="phone_number">Telefono</label>
+						<InputText id="phone_number" v-model.trim="item.phone_number" required="true" autofocus :class="{'p-invalid': submitted && !item.phone_number}" />
+						<small class="p-invalid" v-if="submitted && !item.phone_number">El campo telefono es requerido</small>
+					</div>
+					<div class="field">
+						<label for="email">Email</label>
+						<InputText id="email" v-model.trim="item.email" required="true" autofocus :class="{'p-invalid': submitted && !item.email}" />
+						<small class="p-invalid" v-if="submitted && !item.email">El campo email es requerido</small>
 					</div>
 					<template #footer>
 						<Button label="Cancelar" icon="pi pi-times" class="p-button-text" @click="hideDialog"/>
@@ -111,7 +162,7 @@
 <script>
 import {FilterMatchMode} from 'primevue/api';
 import axios from "axios";
-import {myDate} from '../helpers'
+import {myDate, toMoney} from '../helpers'
 
 export default {
 	data() {
@@ -123,7 +174,12 @@ export default {
 			item: {},
 			selectedItems: null,
 			filters: {},
-			submitted: false
+			submitted: false,
+			paymentMethodList: [
+				{label: 'Efectivo', value: 'efectivo'},
+				{label: 'Trasferencia', value: 'trasferencia'},
+				{label: 'Cheque', value: 'cheque'}
+			]
 		}
 	},
 	created() {
@@ -134,8 +190,9 @@ export default {
 	},
 	methods: {
         myDate,
+		toMoney,
         async getList(){
-            let response = await axios.get('roles', {
+            let response = await axios.get('forms/loans', {
                 withCredentials: true
             });
 
@@ -160,19 +217,19 @@ export default {
 			
             if (this.item.name.trim()) {
                 if (this.item.id) {
-                    await axios.put(`roles/${this.item.id}/`, this.item,
+                    await axios.put(`forms/loans/${this.item.id}/`, this.item,
                     {
                         withCredentials: true
                     });
                     
-                    this.$toast.add({severity:'success', summary: 'Exitoso', detail: 'Rol Actualizado', life: 3000});
+                    this.$toast.add({severity:'success', summary: 'Exitoso', detail: 'Registro Actualizado', life: 3000});
 				}
 				else {
-                    await axios.post(`roles/`, this.item,
+                    await axios.post(`forms/loans/`, this.item,
                     {
                         withCredentials: true
                     });
-					this.$toast.add({severity:'success', summary: 'Exitoso', detail: 'Rol Creado', life: 3000});
+					this.$toast.add({severity:'success', summary: 'Exitoso', detail: 'Registro Creado', life: 3000});
 				}
 				this.itemDialog = false;
 				this.item = {};
@@ -190,14 +247,14 @@ export default {
 		},
 		async deleteItem() {
 			
-            await axios.delete(`roles/${this.item.id}/`,
+            await axios.delete(`forms/loans/${this.item.id}/`,
             {
                 withCredentials: true
             });
 
 			this.deleteItemDialog = false;
 			this.item = {};
-			this.$toast.add({severity:'success', summary: 'Successful', detail: 'Rol Eliminiado', life: 3000});
+			this.$toast.add({severity:'success', summary: 'Successful', detail: 'Registro Eliminiado', life: 3000});
             
             await this.getList();
 		},

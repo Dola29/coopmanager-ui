@@ -99,9 +99,16 @@ import BlockViewer from './BlockViewer';
 
 import './axios'
 
+//let auth = (localStorage.getItem('authenticated') === 'true');
+
 router.beforeEach(function(to, from, next) {
     window.scrollTo(0, 0);
     next();
+    // if(auth){
+    //     next();
+    // }else{
+    //     next({path:'/login'});
+    // }
 });
 
 const app = createApp(AppWrapper);

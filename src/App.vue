@@ -11,8 +11,6 @@
             </div>
             <AppFooter />
         </div>
-
-		<AppConfig :layoutMode="layoutMode" @layout-change="onLayoutChange" />
         <transition name="layout-mask">
             <div class="layout-mask p-component-overlay" v-if="mobileMenuActive"></div>
         </transition>
@@ -22,7 +20,6 @@
 <script>
 import AppTopBar from './AppTopbar.vue';
 import AppMenu from './AppMenu.vue';
-import AppConfig from './AppConfig.vue';
 import AppFooter from './AppFooter.vue';
 import axios from "axios";
 
@@ -36,19 +33,36 @@ export default {
             staticMenuInactive: false,
             overlayMenuActive: false,
             mobileMenuActive: false,
-            menu : [
+            menuNormal : [
                 {
                     label: 'Menu',
                     items: [
                         {label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/'},
-                        {label: 'Roles', icon: 'pi pi-fw pi-chevron-right', to: '/roles'},
-						{label: 'Usuarios', icon: 'pi pi-fw pi-users', to: '/users'}
+                        {label: 'Solicitudes', icon: 'pi pi-fw pi-file', to: '/requests'},
+                        {label: 'Prestamos', icon: 'pi pi-fw pi-file', to: '/loans'},
                     ]
                 }
-            ]
+            ],
+            menuAdmin : [
+                {
+                    label: 'Menu',
+                    items: [
+                        {label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/'},
+                        {label: 'Solicitudes', icon: 'pi pi-fw pi-file', to: '/requests'},
+                        {label: 'Prestamos', icon: 'pi pi-fw pi-file', to: '/loans'},
+                        {label: 'Roles', icon: 'pi pi-fw pi-chevron-right', to: '/roles'},
+						{label: 'Usuarios', icon: 'pi pi-fw pi-users', to: '/users'},
+                    ]
+                }
+            ],
+            menu : []
         }
     },
     async mounted() {
+        let auth = (localStorage.getItem('authenticated') === 'true');
+		if(!auth){
+			await this.$router.push('/login');
+		}
 		await this.getUser()
 	},
     watch: {
@@ -130,7 +144,15 @@ export default {
 				const {data} = await axios.get('auth/user', {
                     withCredentials: true
 				});
+
 				this.user = data;
+
+                this.menu = this.menuNormal;
+
+                if(this.user.role == 1){
+                    this.menu = this.menuAdmin;
+                }
+
 			} catch (e) {
 				await this.$router.push('/login');
 			}
@@ -161,7 +183,6 @@ export default {
     components: {
         'AppTopBar': AppTopBar,
         'AppMenu': AppMenu,
-        'AppConfig': AppConfig,
         'AppFooter': AppFooter,
     }
 }

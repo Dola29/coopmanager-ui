@@ -11,8 +11,8 @@
 					</template>
 
 					<template v-slot:end>
-						<FileUpload mode="basic" accept="image/*" :maxFileSize="1000000" label="Importar" chooseLabel="Importar" class="mr-2 inline-block" />
-						<Button label="Exportar" icon="pi pi-upload" class="p-button-help" @click="exportCSV($event)"  />
+						<!-- <FileUpload mode="basic" accept="image/*" :maxFileSize="1000000" label="Importar" chooseLabel="Importar" class="mr-2 inline-block" /> -->
+						<!-- <Button label="Exportar" icon="pi pi-upload" class="p-button-help" @click="exportCSV($event)"  /> -->
 					</template>
 				</Toolbar>
 
@@ -49,7 +49,7 @@
 					<Column field="role.name" header="Rol" :sortable="true" headerStyle="width:5%; min-width:10rem;">
 						<template #body="slotProps">
 							<span class="p-column-title">Rol</span>
-							{{slotProps.data.role.name}}
+							{{slotProps.data.role ? slotProps.data.role.label : "POR ASIGNAR" }}
 						</template>
 					</Column>
 					<Column field="created_at" header="Creacion" :sortable="true" headerStyle="width:14%; min-width:8rem;">
@@ -67,19 +67,48 @@
 					</Column>
 				</DataTable>
 
-				<Dialog v-model:visible="itemDialog" :style="{width: '450px'}" header="Detalles del rol" :modal="true" class="p-fluid">
+				<Dialog v-model:visible="itemDialog" :style="{width: '450px'}" header="Detalles del rol" :modal="true" :closable="false" class="p-fluid">
 					<div class="field">
-						<label for="name">Name</label>
+						<label for="name">Nombre</label>
 						<InputText id="name" v-model.trim="item.name" required="true" autofocus :class="{'p-invalid': submitted && !item.name}" />
-						<small class="p-invalid" v-if="submitted && !item.name">Name is required.</small>
+						<small class="p-invalid" v-if="submitted && !item.name">El nombre es requerido.</small>
 					</div>
 					<div class="field">
-						<label for="description">Description</label>
-						<Textarea id="description" v-model="item.description" required="true" rows="3" cols="20" />
+						<label for="email">Correo</label>
+						<InputText id="email" type="email" v-model.trim="item.email" required="true" autofocus :class="{'p-invalid': submitted && !item.email}" />
+						<small class="p-invalid" v-if="submitted && !item.email">El correo es requerido</small>
+					</div>					
+					<div v-if="!edit" class="field">
+						<label for="password">Contraseña</label>
+						<Password id="password" v-model.trim="item.password" required="true" autofocus :toggleMask="true"
+							:class="{'p-invalid': submitted && !item.password}">
+                        </Password>
+						<small class="p-invalid" v-if="submitted && !item.password">El correo es requerido</small>
+					</div>
+					<div v-if="!edit" class="field">
+						<label for="role" class="mb-3">Rol</label>
+						<Dropdown id="role" v-model="item.role" :options="roleList" optionLabel="label" placeholder="Seleciona un rol">
+						</Dropdown>
+					</div>
+					<div v-if="edit" class="field">
+						<label for="role" class="mb-3">Rol</label>
+						<Dropdown id="role" v-model="item.role" :options="roleList" optionLabel="label" placeholder="Seleciona un rol"  :class="{'p-invalid': submitted && !item.role}">
+							<template #value="slotProps">
+								<div v-if="slotProps.value && slotProps.value.value">
+									<span>{{slotProps.value.label}}</span>
+								</div>
+								<div v-else-if="slotProps.value && !slotProps.value.value">
+									<span>{{slotProps.value}}</span>
+								</div>
+								<span v-else>
+									{{slotProps.placeholder}}
+								</span>
+							</template>
+						</Dropdown>
 					</div>
 					<template #footer>
-						<Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="hideDialog"/>
-						<Button label="Save" icon="pi pi-check" class="p-button-text" @click="saveItem" />
+						<Button label="Cancelar" icon="pi pi-times" class="p-button-text" @click="hideDialog"/>
+						<Button label="Gruardar" icon="pi pi-check" class="p-button-text" @click="saveItem" />
 					</template>
 				</Dialog>
 
@@ -120,10 +149,12 @@ export default {
 	data() {
 		return {
 			List: null,
+			roleList: null,
 			itemDialog: false,
 			deleteItemDialog: false,
 			deleteItemsDialog: false,
-			item: {},
+			edit: false,
+			item: null,
 			selectedItems: null,
 			filters: {},
 			submitted: false
@@ -134,15 +165,23 @@ export default {
 	},
 	async mounted() {
 		await this.getList();
+		await this.getRoleList();
 	},
 	methods: {
         myDate,
         async getList(){
-            let response = await axios.get('users', {
+            let response = await axios.get('users/list', {
                 withCredentials: true
             });
 
             this.List = response.data
+        },
+		async getRoleList(){
+            let response = await axios.get('roles/getlist', {
+                withCredentials: true
+            });
+
+            this.roleList = response.data
         },
 		formatCurrency(value) {
 			if(value)
@@ -156,35 +195,57 @@ export default {
 		},
 		hideDialog() {
 			this.itemDialog  = false;
+			this.edit  = false;
 			this.submitted = false;
 		},
 		async saveItem() {
 			this.submitted = true;
-			
-            if (this.item.name.trim()) {
-                if (this.item.id) {
-                    await axios.put(`users/${this.item.id}/`, this.item,
-                    {
-                        withCredentials: true
-                    });
-                    
-                    this.$toast.add({severity:'success', summary: 'Exitoso', detail: 'Usuario Actualizado', life: 3000});
+			if (this.item.id) {
+				let user = { 
+					name : this.item.name,
+					email : this.item.email,
+					role : this.item.role.value,
 				}
-				else {
-                    await axios.post(`users/`, this.item,
-                    {
-                        withCredentials: true
-                    });
-					this.$toast.add({severity:'success', summary: 'Exitoso', detail: 'Usuario Creado', life: 3000});
-				}
-				this.itemDialog = false;
-				this.item = {};
+				
+				await axios.put(`users/${this.item.id}/`, user,
+				{
+					withCredentials: true
+				});
+				
+				this.$toast.add({severity:'success', summary: 'Exitoso', detail: 'Usuario Actualizado', life: 3000});
 			}
-
+			else {
+				if (!this.item.name || !this.item.email || !this.item.password ) {
+					this.$toast.add({severity:'error', summary: 'Error', detail: 'Modifique el formulario para guardar', life: 3000});
+				}else if(!this.item.role){
+					this.$toast.add({severity:'error', summary: 'Error', detail: 'El campo Rol es obligatorio', life: 3000});
+				}else{
+					let user = { 
+						name : this.item.name,
+						email : this.item.email,
+						password : this.item.password,
+						role : this.item.role.value,
+					}
+					try{
+						await axios.post(`users/`, user,
+						{
+							withCredentials: true
+						});
+						this.$toast.add({severity:'success', summary: 'Exitoso', detail: 'Usuario Creado', life: 3000});
+					}catch(e){
+						console.log(e)
+					}	
+				}				
+			}
+			this.itemDialog = false;
+			this.edit = false;
+			this.item = {};
+			
             await this.getList();
 		},
 		editItem(item) {
 			this.item = {...item};
+			this.edit = true
 			this.itemDialog = true;
 		},
 		confirmDeleteItem(item) {
@@ -200,7 +261,7 @@ export default {
 
 			this.deleteItemDialog = false;
 			this.item = {};
-			this.$toast.add({severity:'success', summary: 'Successful', detail: 'Rol Eliminiado', life: 3000});
+			this.$toast.add({severity:'success', summary: 'Successful', detail: 'Usuario Eliminiado', life: 3000});
             
             await this.getList();
 		},

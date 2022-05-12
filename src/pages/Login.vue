@@ -1,5 +1,6 @@
 <template>
     <div class="surface-0 flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
+        <Toast/>
         <div class="grid justify-content-center p-2 lg:p-0" style="min-width:80%">
             <div class="col-12 mt-5 xl:mt-0 text-center">
                 <img :src="'layout/images/logo-coop.jpg'" alt="Sakai logo" class="mb-5" >
@@ -14,10 +15,10 @@
                     <div class="w-full md:w-10 mx-auto">
                         <form @submit.prevent="submit">
                             <label for="email" class="block text-900 text-xl font-medium mb-2">Correo</label>
-                            <InputText id="email" v-model="email" type="text" class="w-full mb-3" placeholder="Email" style="padding:1rem;" />
+                            <InputText id="email" v-model="email" type="text" class="w-full mb-3" placeholder="Email" required style="padding:1rem;" />
                     
                             <label for="password" class="block text-900 font-medium text-xl mb-2">Contraseña</label>
-                            <Password id="password" v-model="password" placeholder="Password" :toggleMask="true" 
+                            <Password id="password" v-model="password" placeholder="Password" :toggleMask="true"  required
                                 class="w-full mb-3" inputClass="w-full" inputStyle="padding:1rem">
                             </Password>
                             <Button label="Acceder" class="w-full p-3 text-xl" type="submit"></button>
@@ -52,6 +53,9 @@ export default {
             return 'dark';
         }
     },
+    maunted(){
+        localStorage.setItem('authenticated', false);
+    },
     methods:{
         async submit(){
             try{
@@ -63,9 +67,10 @@ export default {
                 const {data} = await axios.post('auth/login', form, {
                     withCredentials: true
                 });
-                axios.defaults.headers.common['Authorization'] = data['jwt'];                
+                axios.defaults.headers.common['Authorization'] = data['jwt'];
                 await this.$router.push('/');
             }catch (e) {
+                this.$toast.add({severity:'error', summary: 'Error', detail: 'Usuario o contraseña invalido', life: 3000});
                 console.log(e)
             }
         }

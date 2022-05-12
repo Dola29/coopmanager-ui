@@ -22,6 +22,16 @@ const routes = [
                 name: 'users',
                 component: () => import('./pages/Users.vue')
             },
+            {
+                path: '/requests',
+                name: 'requests',
+                component: () => import('./pages/Requests.vue')
+            },
+            {
+                path: '/loans',
+                name: 'loans',
+                component: () => import('./pages/Loans.vue')
+            }
         ]
     },
     {

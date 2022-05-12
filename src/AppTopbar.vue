@@ -46,7 +46,7 @@ export default {
             this.$emit('topbar-menu-toggle', event);
         },
 		topbarImage() {
-			return this.$appState.darkTheme ? 'images/logo-white.svg' : 'images/logo-dark.svg';
+			return this.$appState.darkTheme ? 'layout/images/logo.png' : 'layout/images/logo-normal.png';
 		},
 		async logout(){
 			axios.post('auth/logout', {}, {withCredentials: true});

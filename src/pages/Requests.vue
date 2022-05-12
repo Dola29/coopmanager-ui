@@ -22,7 +22,7 @@
 							currentPageReportTemplate="Mostrando {first} al {last} de {totalRecords} registros" responsiveLayout="scroll">
 					<template #header>
 						<div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-							<h5 class="m-0">Manejo de roles</h5>
+							<h5 class="m-0">Manejo de solicitudes</h5>
 							<span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search" />
                                 <InputText v-model="filters['global'].value" placeholder="Buscar..." />
@@ -40,18 +40,36 @@
 					<Column field="name" header="Nombre" :sortable="true" headerStyle="width:14%; min-width:10rem;">
 						<template #body="slotProps">
 							<span class="p-column-title">Nombre</span>
-							{{slotProps.data.name}}
+							{{slotProps.data.name}} {{slotProps.data.lastname}}
 						</template>
 					</Column>
-					<Column field="description" header="Descripcion" headerStyle="width:25%; min-width:10rem;">
+					<Column field="initial_contributions" :sortable="true" header="Aportes iniciales" headerStyle="width:25%; min-width:10rem;">
 						<template #body="slotProps">
-							<span class="p-column-title">Descripcion</span>
-							{{slotProps.data.description}}
+							<span class="p-column-title">Aportes iniciales</span>
+							{{toMoney(slotProps.data.inicial_contributions)}}
+						</template>
+					</Column>
+					<Column field="initial_savings" header="Ahorros iniciales" :sortable="true" headerStyle="width:25%; min-width:10rem;">
+						<template #body="slotProps">
+							<span class="p-column-title">Ahorros iniciales</span>
+							{{toMoney(slotProps.data.initial_savings) }}
+						</template>
+					</Column>					
+					<Column field="email" header="Correo" :sortable="true" headerStyle="width:25%; min-width:10rem;">
+						<template #body="slotProps">
+							<span class="p-column-title">Email</span>
+							{{slotProps.data.email}}
+						</template>
+					</Column>
+					<Column field="phone_number" header="Telefono" :sortable="true" headerStyle="width:25%; min-width:10rem;">
+						<template #body="slotProps">
+							<span class="p-column-title">Telefono</span>
+							{{slotProps.data.phone_number}}
 						</template>
 					</Column>
 					<Column field="created_at" header="Creacion" :sortable="true" headerStyle="width:14%; min-width:8rem;">
 						<template #body="slotProps">
-							<span class="p-column-title">Creacion</span>
+							<span class="p-column-title">Fecha Registro</span>
 							{{myDate(slotProps.data.created_at)}}
 						</template>
 					</Column>
@@ -62,17 +80,73 @@
 							<Button icon="pi pi-trash" class="p-button-rounded p-button-warning mt-2" @click="confirmDeleteItem(slotProps.data)" />
 						</template>
 					</Column>
+					
 				</DataTable>
 
-				<Dialog v-model:visible="itemDialog" :style="{width: '450px'}" header="Detalles del rol" :modal="true" :closable="false" class="p-fluid">
+				<Dialog v-model:visible="itemDialog" :style="{width: '450px'}" header="Detalles del registro" :modal="true" :closable="false" class="p-fluid">
 					<div class="field">
 						<label for="name">Nombre</label>
 						<InputText id="name" v-model.trim="item.name" required="true" autofocus :class="{'p-invalid': submitted && !item.name}" />
 						<small class="p-invalid" v-if="submitted && !item.name">El nombre es requerido</small>
 					</div>
 					<div class="field">
-						<label for="description">Description</label>
-						<Textarea id="description" v-model="item.description" required="true" rows="3" cols="20" />
+						<label for="name">Apellido</label>
+						<InputText id="lastname" v-model.trim="item.lastname" required="true" autofocus :class="{'p-invalid': submitted && !item.lastname}" />
+						<small class="p-invalid" v-if="submitted && !item.lastname">El apellido es requerido</small>
+					</div>
+					<div class="field">
+						<label for="name">Aportes Iniciales</label>
+						<InputText id="inicial_contributions" v-model.trim="item.inicial_contributions" required="true" autofocus :class="{'p-invalid': submitted && !item.inicial_contributions}" />
+						<small class="p-invalid" v-if="submitted && !item.inicial_contributions">El campo aportes iniciales es requerido</small>
+					</div>
+					<div class="field">
+						<label for="payment_method_ic" class="mb-3">Metodo de pago (Aportes iniciales)</label>
+						<Dropdown id="payment_method_ic" v-model="item.payment_method_ic" :options="paymentMethodList" optionLabel="label" placeholder="Seleciona un Metodo de pago"  
+							:class="{'p-invalid': submitted && !item.payment_method_ic}">
+							<template #value="slotProps">
+								<div v-if="slotProps.value && slotProps.value.value">
+									<span>{{slotProps.value.label}}</span>
+								</div>
+								<div v-else-if="slotProps.value && !slotProps.value.value">
+									<span>{{slotProps.value}}</span>
+								</div>
+								<span v-else>
+									{{slotProps.placeholder}}
+								</span>
+							</template>
+						</Dropdown>
+					</div>
+					<div class="field">
+						<label for="name">Ahorros iniciales</label>
+						<InputText id="initial_savings" v-model.trim="item.initial_savings" required="true" autofocus :class="{'p-invalid': submitted && !item.initial_savings}" />
+						<small class="p-invalid" v-if="submitted && !item.initial_savings">El campo ahorros iniciales es requerido</small>
+					</div>
+					<div class="field">
+						<label for="payment_method_is" class="mb-3">Metodo de pago (Ahorros iniciales)</label>
+						<Dropdown id="payment_method_is" v-model="item.payment_method_is" :options="paymentMethodList" optionLabel="label" placeholder="Seleciona un Metodo de pago"  
+							:class="{'p-invalid': submitted && !item.payment_method_is}">
+							<template #value="slotProps">
+								<div v-if="slotProps.value && slotProps.value.value">
+									<span>{{slotProps.value.label}}</span>
+								</div>
+								<div v-else-if="slotProps.value && !slotProps.value.value">
+									<span>{{slotProps.value}}</span>
+								</div>
+								<span v-else>
+									{{slotProps.placeholder}}
+								</span>
+							</template>
+						</Dropdown>
+						<div class="field">
+							<label for="email">Correo</label>
+							<InputText id="email" v-model.trim="item.email" required="true" autofocus :class="{'p-invalid': submitted && !item.email}" />
+							<small class="p-invalid" v-if="submitted && !item.email">El correo es requerido</small>
+						</div>
+						<div class="field">
+							<label for="name">Telefono</label>
+							<InputText id="phone_number" v-model.trim="item.phone_number" required="true" autofocus :class="{'p-invalid': submitted && !item.phone_number}" />
+							<small class="p-invalid" v-if="submitted && !item.phone_number">El telefono es requerido</small>
+						</div>
 					</div>
 					<template #footer>
 						<Button label="Cancelar" icon="pi pi-times" class="p-button-text" @click="hideDialog"/>
@@ -111,7 +185,7 @@
 <script>
 import {FilterMatchMode} from 'primevue/api';
 import axios from "axios";
-import {myDate} from '../helpers'
+import {myDate, toMoney} from '../helpers'
 
 export default {
 	data() {
@@ -123,7 +197,12 @@ export default {
 			item: {},
 			selectedItems: null,
 			filters: {},
-			submitted: false
+			submitted: false,
+			paymentMethodList: [
+				{label: 'Efectivo', value: 'efectivo'},
+				{label: 'Trasferencia', value: 'trasferencia'},
+				{label: 'Cheque', value: 'cheque'}
+			]
 		}
 	},
 	created() {
@@ -134,8 +213,9 @@ export default {
 	},
 	methods: {
         myDate,
+		toMoney,
         async getList(){
-            let response = await axios.get('roles', {
+            let response = await axios.get('forms/requests', {
                 withCredentials: true
             });
 
@@ -160,19 +240,19 @@ export default {
 			
             if (this.item.name.trim()) {
                 if (this.item.id) {
-                    await axios.put(`roles/${this.item.id}/`, this.item,
+                    await axios.put(`forms/requests/${this.item.id}/`, this.item,
                     {
                         withCredentials: true
                     });
                     
-                    this.$toast.add({severity:'success', summary: 'Exitoso', detail: 'Rol Actualizado', life: 3000});
+                    this.$toast.add({severity:'success', summary: 'Exitoso', detail: 'Registro Actualizado', life: 3000});
 				}
 				else {
-                    await axios.post(`roles/`, this.item,
+                    await axios.post(`forms/requests/`, this.item,
                     {
                         withCredentials: true
                     });
-					this.$toast.add({severity:'success', summary: 'Exitoso', detail: 'Rol Creado', life: 3000});
+					this.$toast.add({severity:'success', summary: 'Exitoso', detail: 'Registro Creado', life: 3000});
 				}
 				this.itemDialog = false;
 				this.item = {};
@@ -190,14 +270,14 @@ export default {
 		},
 		async deleteItem() {
 			
-            await axios.delete(`roles/${this.item.id}/`,
+            await axios.delete(`forms/requests/${this.item.id}/`,
             {
                 withCredentials: true
             });
 
 			this.deleteItemDialog = false;
 			this.item = {};
-			this.$toast.add({severity:'success', summary: 'Successful', detail: 'Rol Eliminiado', life: 3000});
+			this.$toast.add({severity:'success', summary: 'Successful', detail: 'Registro Eliminiado', life: 3000});
             
             await this.getList();
 		},
