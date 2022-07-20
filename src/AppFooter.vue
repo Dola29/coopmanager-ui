@@ -1,7 +1,7 @@
 <template>
 	<div class="layout-footer">
-		<a href="https://github.com/Dola29">
-			<span class="font-medium ml-2">@Dola29</span>
+		<a href="">
+			<span class="font-medium ml-2">@COOPED</span>
 		</a>
 	</div>
 </template>

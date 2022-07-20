@@ -112,7 +112,8 @@
 					</div>
 					<div class="field">
 						<label for="dob">Fecha de Nacimiento</label>
-						<InputText id="dob" v-model.trim="item.dob" required="true" autofocus :class="{'p-invalid': submitted && !item.dob}" />
+						<Calendar :dateFormat="dateFormat" :showIcon="true" :showButtonBar="true" v-model="item.dob" :class="{'p-invalid': submitted && !item.dob}">
+						</Calendar>
 						<small class="p-invalid" v-if="submitted && !item.dob">El campo Fecha de Nacimiento iniciales es requerido</small>
 					</div>
 					<div class="field">
@@ -162,7 +163,7 @@
 <script>
 import {FilterMatchMode} from 'primevue/api';
 import axios from "axios";
-import {myDate, toMoney} from '../helpers'
+import {myDate, dateToEnglish, toMoney} from '../helpers'
 
 export default {
 	data() {
@@ -179,7 +180,8 @@ export default {
 				{label: 'Efectivo', value: 'efectivo'},
 				{label: 'Trasferencia', value: 'trasferencia'},
 				{label: 'Cheque', value: 'cheque'}
-			]
+			],
+			dateFormat: "dd/mm/yy",
 		}
 	},
 	created() {
@@ -190,6 +192,7 @@ export default {
 	},
 	methods: {
         myDate,
+		dateToEnglish,
 		toMoney,
         async getList(){
             let response = await axios.get('forms/loans', {
@@ -217,15 +220,37 @@ export default {
 			
             if (this.item.name.trim()) {
                 if (this.item.id) {
-                    await axios.put(`forms/loans/${this.item.id}/`, this.item,
+
+					let toSave = {
+						"name": this.item.name,
+						"lastname": this.item.lastname,
+						"dob": dateToEnglish(this.item.dob),
+						"cedula": this.item.cedula,
+						"loan_amount": this.item.loan_amount,
+						"monthly_income": this.item.monthly_income,
+						"phone_number": this.item.phone_number,
+						"email": this.item.email,
+					}
+
+                    await axios.put(`forms/loans/${this.item.id}/`, toSave,
                     {
                         withCredentials: true
                     });
                     
                     this.$toast.add({severity:'success', summary: 'Exitoso', detail: 'Registro Actualizado', life: 3000});
 				}
-				else {
-                    await axios.post(`forms/loans/`, this.item,
+				else { 
+					let toSave = {
+						"name": this.item.name,
+						"lastname": this.item.lastname,
+						"dob": dateToEnglish(this.item.dob),
+						"cedula": this.item.cedula,
+						"loan_amount": this.item.loan_amount,
+						"monthly_income": this.item.monthly_income,
+						"phone_number": this.item.phone_number,
+						"email": this.item.email,
+					}
+                    await axios.post(`forms/loans/`, toSave,
                     {
                         withCredentials: true
                     });
@@ -233,12 +258,15 @@ export default {
 				}
 				this.itemDialog = false;
 				this.item = {};
+			}else{
+				this.$toast.add({severity:'error', summary: 'Error', detail: 'Digite la infrmacion correctamente', life: 3000});
 			}
 
             await this.getList();
 		},
 		editItem(item) {
-			this.item = {...item};
+			this.item = {...item};		
+			this.item.dob = myDate(item.dob);
 			this.itemDialog = true;
 		},
 		confirmDeleteItem(item) {

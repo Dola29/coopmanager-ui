@@ -6,7 +6,7 @@
 				<div class="flex justify-content-between mb-3">
 					<div>
 						<span class="block text-500 font-medium mb-3">Solicitudes Totales</span>
-						<div class="text-900 font-medium text-xl">{{total_solicitudes}}</div>
+						<div class="text-900 font-medium text-xl">{{lineData.total_solicitudes}}</div>
 					</div>
 					<div class="flex align-items-center justify-content-center bg-orange-100 border-round" style="width:2.5rem;height:2.5rem">
 						<i class="pi pi-map-marker text-orange-500 text-xl"></i>
@@ -19,7 +19,7 @@
 				<div class="flex justify-content-between mb-3">
 					<div>
 						<span class="block text-500 font-medium mb-3">Prestamos Solicitados</span>
-						<div class="text-900 font-medium text-xl">{{total_prestamos}}</div>
+						<div class="text-900 font-medium text-xl">{{lineData.total_prestamos}}</div>
 					</div>
 					<div class="flex align-items-center justify-content-center bg-cyan-100 border-round" style="width:2.5rem;height:2.5rem">
 						<i class="pi pi-inbox text-cyan-500 text-xl"></i>
@@ -59,7 +59,7 @@ export default {
 			lineData: {
 				total_solicitudes: 0,
 				total_prestamos: 0,
-				labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+				labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio'],
 				datasets: [
 					{
 						label: 'Solicitudes de Prestamos',
@@ -121,10 +121,10 @@ export default {
 				});
 				this.lineData.datasets[0].data = data.data.loan_line
 				this.lineData.datasets[1].data = data.data.register_line
-				this.total_solicitudes = data.data.register_count
-				this.total_prestamos = data.data.loan_count
+				this.lineData.total_solicitudes = data.data.register_count
+				this.lineData.total_prestamos = data.data.loan_count
 
-				console.log(data.loan_count)
+				console.log(data.data.loan_count)
 			
 				
 			} catch (e) {

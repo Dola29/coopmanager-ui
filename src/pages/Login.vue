@@ -71,7 +71,7 @@ export default {
                 await this.$router.push('/');
             }catch (e) {
                 this.$toast.add({severity:'error', summary: 'Error', detail: 'Usuario o contraseña invalido', life: 3000});
-                console.log(e)
+                location.reload()
             }
         }
     }

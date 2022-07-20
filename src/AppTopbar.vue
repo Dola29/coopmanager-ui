@@ -49,6 +49,7 @@ export default {
 			return this.$appState.darkTheme ? 'layout/images/logo.png' : 'layout/images/logo-normal.png';
 		},
 		async logout(){
+			localStorage.removeItem("authenticated")
 			axios.post('auth/logout', {}, {withCredentials: true});
 			axios.defaults.headers.common['Authorization'] = '';
 			this.$router.push('/login');
